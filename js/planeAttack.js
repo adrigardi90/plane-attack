@@ -1,4 +1,3 @@
-
 //Keycodes
 const LEFT = 37;
 const UP = 38;
@@ -12,7 +11,6 @@ canvas.width = 512;
 canvas.height = 480;
 
 // ---------------- background ---------------
-
 //Plane image
 var backgroundReady = false;
 var backgroundImage = new Image();
@@ -64,6 +62,7 @@ addEventListener("keyup", function(e){
 }, true);
 
 
+// -------------- Functions -------------------
 
 //Init positions	
 function init(){
@@ -77,7 +76,7 @@ function init(){
 	birdObj.y = Math.round(Math.random()*(canvas.height - 60));
 }
 
-
+//Update the plane position
 function updatePosition(elapsed){
 
 	var distance = (planeObj.speed / 100) * elapsed;
@@ -99,6 +98,7 @@ function updatePosition(elapsed){
 	}
 }
 
+//Draw all the objects
 function paintPosition(){
 
 	//We need to draw the backgroundImage all the time, in order to refresh and delete the last plane position
@@ -115,7 +115,7 @@ function paintPosition(){
 	}
 }
 
-//Main cicle 
+//Main program cicle 
 function main(){
 
 	var now = Date.now();
