@@ -5,10 +5,21 @@ const UP = 38;
 const RIGHT = 39;
 const DOWN = 40;
 
+var lastUpdate = Date.now();
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
 canvas.width = 512;
 canvas.height = 480;
+
+// ---------------- background ---------------
+
+//Plane image
+var backgroundReady = false;
+var backgroundImage = new Image();
+backgroundImage.onload = function () {
+	backgroundReady = true;
+};
+backgroundImage.src = "images/sky.jpg";
 
 // ---------------- Plane --------------------
 //Plane object
@@ -28,7 +39,7 @@ planeImage.src = "images/plane.png";
 // -------------- Bird -----------------------
 // Bird object
 var birdObj = {
-	speed: 50
+	speed: 100
 }
 
 //Bird image
@@ -53,8 +64,10 @@ addEventListener("keyup", function(e){
 }, true);
 
 
+
 //Init positions	
 function init(){
+
 	//First plane position
 	planeObj.x = canvas.width / 2;
 	planeObj.y = canvas.height /2;
@@ -64,8 +77,34 @@ function init(){
 	birdObj.y = Math.round(Math.random()*(canvas.height - 60));
 }
 
-//Main cicle 
-function main(){
+
+function updatePosition(elapsed){
+
+	var distance = (planeObj.speed / 100) * elapsed;
+
+	if(keyActions.hasOwnProperty(UP)){
+		(planeObj.y > 0) ? planeObj.y -= distance : planeObj.y = 0 ;
+	}
+
+	if(keyActions.hasOwnProperty(DOWN)){
+		(planeObj.y < canvas.height - 80) ? planeObj.y += distance : planeObj.y = canvas.height - 80;
+	}
+
+	if(keyActions.hasOwnProperty(RIGHT)){
+		(planeObj.x < canvas.width - 80) ? planeObj.x += distance : planeObj.x = canvas.width - 80;
+	}
+
+	if(keyActions.hasOwnProperty(LEFT)){
+		(planeObj.x > 0) ? planeObj.x -= distance : planeObj.x = 0;
+	}
+}
+
+function paintPosition(){
+
+	//We need to draw the backgroundImage all the time, in order to refresh and delete the last plane position
+	if(backgroundReady){
+		ctx.drawImage(backgroundImage, 0, 0);	
+	}
 
 	if(planeReady){
 		ctx.drawImage(planeImage, planeObj.x, planeObj.y, 80, 80);	
@@ -74,7 +113,18 @@ function main(){
 	if(birdReady){
 		ctx.drawImage(birdImage, birdObj.x, birdObj.y, 60, 35);	
 	}
+}
 
+//Main cicle 
+function main(){
+
+	var now = Date.now();
+	var elapsed = (now - this.lastUpdate);
+
+	updatePosition(elapsed);
+	paintPosition();
+
+	this.lastUpdate = now;
 }
 
 //Append canvas to div tag
