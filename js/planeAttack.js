@@ -4,6 +4,12 @@ const UP = 38;
 const RIGHT = 39;
 const DOWN = 40;
 
+var score = 0;
+var bestScore = 0;
+var firstMove = false;
+var start = true;
+var resetClock = false;
+var interval = 10;
 var lastUpdate = Date.now();
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
@@ -53,10 +59,13 @@ birdImage.src = "images/bird.png";
 
 var keyActions = {};
 
+//Listening event to the pressed key
 addEventListener("keydown", function(e){
+	firstMove == false ? firstMove = true : firstMove =  firstMove;
 	keyActions[e.keyCode] = true;
 }, true);
 
+//Listening event when the key is released
 addEventListener("keyup", function(e){
 	delete keyActions[e.keyCode];
 }, true);
@@ -67,10 +76,26 @@ addEventListener("keyup", function(e){
 //Init positions	
 function init(){
 
-	//First plane position
-	planeObj.x = canvas.width / 2;
-	planeObj.y = canvas.height /2;
+	if(start){
+		//First plane position
+		planeObj.x = canvas.width / 2;
+		planeObj.y = canvas.height /2;	
+		start = false;	
 
+		//New game
+		if(resetClock){
+			clock = setInterval(function(){
+						if(firstMove){
+							checkClock();
+							document.getElementById("clock").setAttribute("value", '00 : ' + String("0" + interval).slice(-2));
+							document.getElementById("score").setAttribute("value", '- '+ score + ' -');
+							document.getElementById("bestscore").setAttribute("value", 'Mejor puntuacion : ' + bestScore);
+						}
+					},1000) 
+		}
+		
+	}
+	
 	//Random first bird position
 	birdObj.x = Math.round(Math.random()*(canvas.width - 35));
 	birdObj.y = Math.round(Math.random()*(canvas.height - 60));
@@ -82,19 +107,31 @@ function updatePosition(elapsed){
 	var distance = (planeObj.speed / 100) * elapsed;
 
 	if(keyActions.hasOwnProperty(UP)){
-		(planeObj.y > 0) ? planeObj.y -= distance : planeObj.y = 0 ;
+		//(planeObj.y > 0) ? planeObj.y -= distance : planeObj.y = 0 ;
+		(planeObj.y > -70) ? planeObj.y -= distance : planeObj.y = canvas.height;
 	}
 
 	if(keyActions.hasOwnProperty(DOWN)){
-		(planeObj.y < canvas.height - 80) ? planeObj.y += distance : planeObj.y = canvas.height - 80;
+		//(planeObj.y < canvas.height - 80) ? planeObj.y += distance : planeObj.y = canvas.height - 80;
+		(planeObj.y < canvas.height) ? planeObj.y += distance : planeObj.y = -70;
 	}
 
 	if(keyActions.hasOwnProperty(RIGHT)){
-		(planeObj.x < canvas.width - 80) ? planeObj.x += distance : planeObj.x = canvas.width - 80;
+		//(planeObj.x < canvas.width - 80) ? planeObj.x += distance : planeObj.x = canvas.width - 80;
+		(planeObj.x < canvas.width) ? planeObj.x += distance : planeObj.x = -70;
 	}
 
 	if(keyActions.hasOwnProperty(LEFT)){
-		(planeObj.x > 0) ? planeObj.x -= distance : planeObj.x = 0;
+		//(planeObj.x > 0) ? planeObj.x -= distance : planeObj.x = 0;
+		(planeObj.x > -70) ? planeObj.x -= distance : planeObj.x = canvas.width;
+	}
+
+	//Touch bird?
+	if( planeObj.x <= (birdObj.x + 30) && planeObj.y <= (birdObj.y + 16)
+		&& birdObj.x <=(planeObj.x + 40) &&  birdObj.y <= (planeObj.y + 40)){
+		score++;
+		init();
+
 	}
 }
 
@@ -127,10 +164,42 @@ function main(){
 	this.lastUpdate = now;
 }
 
+//Time control and reset
+function checkClock(){
+
+	if(interval === 0){
+		clearInterval(clock);	
+		start = true;
+		interval = 10;
+		resetClock = true;
+		firstMove = false;
+		score > bestScore ? bestScore = score : bestScore;
+		score = 0;
+		init();
+	}else{
+		interval--;	
+	}
+}
+
 //Append canvas to div tag
 window.onload = function(){
 	document.getElementById("main").appendChild(canvas);
+	document.getElementById("clock").setAttribute("value", '00 : ' + interval);
+	document.getElementById("bestscore").setAttribute("value", 'Mejor puntuacion : ' + bestScore);
+	document.getElementById("score").setAttribute("value", '- '+ score + ' -');
 }
 
-init();
+init();		
+
+//Control game time
+var clock = setInterval(function(){
+				if(firstMove){
+					checkClock();
+					document.getElementById("clock").setAttribute("value", '00 : ' + String("0" + interval).slice(-2));
+					document.getElementById("score").setAttribute("value", '- '+ score + ' -');
+					document.getElementById("bestscore").setAttribute("value", 'Mejor puntuacion : ' + bestScore);
+				}
+			},1000) 
+
+//Exec main program
 setInterval(main, 1);

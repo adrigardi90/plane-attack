@@ -2,6 +2,21 @@
 		background-image: url('../images/sky.jpg');
 }*/
 
-#main {
+div {
 	text-align: center;
+	padding-bottom: 20px;
+}
+
+div input{
+	text-align: center;
+	font-size: -webkit-xxx-large;
+	border: 0;
+}
+
+#score{
+	font-size: xx-large;
+}
+
+#info{
+	display: grid;
 }
