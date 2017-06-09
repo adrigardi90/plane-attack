@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/adrigardi90/planeAttack/blob/master/images/canvas.jpg" alt="Plane attack" width="300" height="400"/>
+  <img src="https://github.com/adrigardi90/planeAttack/blob/master/images/canvas.jpg" alt="Plane attack" width="250" height="270"/>
 </p>
 
 # planeAttack
