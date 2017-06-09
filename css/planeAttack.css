@@ -9,8 +9,9 @@ div {
 
 div input{
 	text-align: center;
-	font-size: -webkit-xxx-large;
+	font-size: xx-large;
 	border: 0;
+	pointer-events: none;
 }
 
 #score{
