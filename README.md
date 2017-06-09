@@ -5,6 +5,8 @@
 # planeAttack
 > Simple game using [canvas API](https://developer.mozilla.org/es/docs/Web/HTML/Canvas) with Html 5, Css and Javascript
 
-You only need to open the planeAttack.html file in your Chrome browser
+You only need to open the planeAttack.html file in your Chrome browser.
+
+How many birds can you reach in the time?
 
 
