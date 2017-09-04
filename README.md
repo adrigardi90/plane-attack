@@ -10,7 +10,7 @@ You only need to open the planeAttack.html file in your Chrome browser.
 How many birds can you reach in the time?
 
 <p align="center">
-  <img src="https://github.com/adrigardi90/planeAttack/tree/master/images/screenshot.png" alt="ChatRoom" width="650" height="600"/>
+  <img src="https://github.com/adrigardi90/planeAttack/blob/master/images/screenshot.png" alt="ChatRoom" width="650" height="600"/>
 </p>
 
 
