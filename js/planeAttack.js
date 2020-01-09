@@ -145,45 +145,43 @@ function updateElements(elapsed) {
  */
 function paintElements(delta) {
 
-	// We need to draw the backgroundImage all the time, in order to refresh and delete the last plane position
-	if (backgroundReady) {
+	// We draw the backgroundImage all the time  to refresh and delete the last plane position
+	// We start moving the background when the first key has been pressed
+	if (!firstMove) {
+		totalSeconds += delta
 
-		// We start moving the background when the first key has been pressed
-		if (!firstMove) {
-			totalSeconds += delta
+		const vx = 100 // the background scrolls with a speed of 100 pixels/sec
+		const numImages = Math.ceil(canvas.width / backgroundImage.width) + 1
+		const xpos = (totalSeconds * vx) % backgroundImage.width
 
-			const vx = 100 // the background scrolls with a speed of 100 pixels/sec
-			const numImages = Math.ceil(canvas.width / backgroundImage.width) + 1
-			const xpos = totalSeconds * vx % backgroundImage.width
+		ctx.save()
+		ctx.translate(-xpos, 0)
 
-			ctx.save()
-			ctx.translate(-xpos, 0)
-
-			for (let i = 0; i < numImages; i++) {
-				ctx.drawImage(backgroundImage, i * backgroundImage.width, 0)
-			}
-
-			ctx.restore()
-		} else {
-			// Reset background image in canvas to position 0 0 (dx dy)
-			ctx.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
-			totalSeconds = 0
+		for (let i = 0; i < numImages; i++) {
+			ctx.drawImage(backgroundImage, i * backgroundImage.width, 0)
 		}
+
+		ctx.restore()
+	} else {
+		// Reset background image in canvas to position 0 0 (dx dy)
+		ctx.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
+		totalSeconds = 0
 	}
 
-	if (planeReady) {
-		ctx.drawImage(planeImage, planeObj.x, planeObj.y, 80, 80)
-	}
+	// Paint the plane
+	ctx.drawImage(planeImage, planeObj.x, planeObj.y, 80, 80)
+	// Paint the bird
+	ctx.drawImage(birdImage, birdObj.x, birdObj.y, 60, 35)
 
-	if (birdReady) {
-		ctx.drawImage(birdImage, birdObj.x, birdObj.y, 60, 35)
-	}
 }
 
 /**
  * Main program
  */
 function main() {
+
+	// No logic untill the elements are ready
+	if (!backgroundReady || !birdReady || !planeReady) return
 
 	const now = Date.now()
 	const elapsed = now - this.lastUpdate
