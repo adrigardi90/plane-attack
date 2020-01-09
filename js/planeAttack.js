@@ -109,7 +109,7 @@ function init() {
  */
 function updateElements(elapsed) {
 
-	var distance = planeObj.speed * elapsed
+	const distance = planeObj.speed * elapsed
 
 	// UP key
 	if (keyActions.hasOwnProperty(UP)) {
