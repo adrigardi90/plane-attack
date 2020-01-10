@@ -28,7 +28,7 @@ canvas.height = 510
 var backgroundReady = false
 const backgroundImage = new Image()
 backgroundImage.onload = () => backgroundReady = true
-backgroundImage.src = "images/sky2.png"
+backgroundImage.src = "images/sky.png"
 
 // Plane
 var planeObj = { speed: 400 }
@@ -80,12 +80,12 @@ function updateScoreAndTime(interval, score, bestScore) {
 }
 
 /**
- * Calculate the elements positions in the canvas
+ * Calculate the elements position in canvas
  */
 function init() {
 
 	if (start) {
-		// First plane position
+		// First plane position in the middle
 		planeObj.x = canvas.width / 2
 		planeObj.y = canvas.height / 2
 		start = false
@@ -168,10 +168,10 @@ function paintElements(delta) {
 		totalSeconds = 0
 	}
 
-	// Paint the plane
+	// Paint the plane. Size 80x80
 	ctx.drawImage(planeImage, planeObj.x, planeObj.y, 80, 80)
-	// Paint the bird
-	ctx.drawImage(birdImage, birdObj.x, birdObj.y, 60, 35)
+	// Paint the bird. Size 60x32
+	ctx.drawImage(birdImage, birdObj.x, birdObj.y, 60, 32)
 
 }
 
