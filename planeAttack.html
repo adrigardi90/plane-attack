@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Plane Attack</title>
-    <meta charset="UTF-8">
-	<link type="text/css" rel="stylesheet" href="css/planeAttack.css"> 
+	<title>Plane Attack</title>
+	<meta charset="UTF-8">
+	<link type="text/css" rel="stylesheet" href="css/planeAttack.css">
 	<script src="js/planeAttack.js"></script>
 </head>
 
 <body>
-	<div id="info">
-		<input id="bestscore" type="text">
-		<input id="score" type="text">
+	<!-- Game scores -->
+	<div id="info" class="game-score">
+		<input id="bestscore" class="best-score" type="text">
+		<input id="score" class="current-score" type="text">
 	</div>
 
+	<!-- Game board -->
 	<div id="main"></div>
 
+	<!-- Game clock -->
 	<div>
-	   <input id="clock" type="text">
+		<input id="clock" type="text" class="clock">
 	</div>
 </body>
 
 </html>
-
