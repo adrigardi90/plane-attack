@@ -82,7 +82,7 @@ function updateScoreAndTime(interval, score, bestScore) {
 /**
  * Calculate the elements position in canvas
  */
-function init() {
+function calculatePositions() {
 
 	if (start) {
 		// First plane position in the middle
@@ -92,7 +92,7 @@ function init() {
 
 		// New game
 		if (resetClock) {
-			setClockInterval()
+			setTimer()
 		}
 	}
 
@@ -135,7 +135,7 @@ function updateElements(elapsed) {
 	if (planeObj.x <= (birdObj.x + 30) && planeObj.y <= (birdObj.y + 16)
 		&& birdObj.x <= (planeObj.x + 40) && birdObj.y <= (planeObj.y + 40)) {
 		score++
-		init()
+		calculatePositions()
 	}
 }
 
@@ -200,7 +200,7 @@ function main() {
 /**
  * Control the game time
  */
-function setClockInterval() {
+function setTimer() {
 	clock = setInterval(() => {
 		if (firstMove) return
 
@@ -213,7 +213,7 @@ function setClockInterval() {
 			firstMove = true
 			score > bestScore ? bestScore = score : bestScore // Update best score
 			score = 0
-			init()
+			calculatePositions()
 		} else {
 			// 1 less second
 			interval--
@@ -223,7 +223,7 @@ function setClockInterval() {
 
 // Append canvas to div tag
 window.onload = function () {
-	document.getElementById("main").appendChild(canvas)
+	document.getElementById("board").appendChild(canvas)
 
 	clockElem = document.getElementById("clock")
 	bestScoreElem = document.getElementById("bestscore")
@@ -239,10 +239,10 @@ window.onload = function () {
 addEventListeners()
 
 // Calculate positions
-init()
+calculatePositions()
 
 // Set clock with 1 second interval
-setClockInterval()
+setTimer()
 
 // Execute main program every 1 ms
 setInterval(main, 1)
