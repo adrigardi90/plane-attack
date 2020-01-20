@@ -1,20 +1,21 @@
 // Keycodes
-const LEFT = 37
-const UP = 38
-const RIGHT = 39
-const DOWN = 40
+// const LEFT = 37
+// const UP = 38
+// const RIGHT = 39
+// const DOWN = 40
+const [LEFT, UP, RIGHT, DOWN] = [37, 38, 39, 40]
 
 // KEY LISTENERS
 var keyActions = {}
 
 // Global var
 var totalSeconds = 0
-var score = 0 // Current score
-var bestScore = 0 // Best score
+
+var [score, bestScore, interval] = [0, 0, 10]
+
 var firstMove = true
 var start = true
 var resetClock = false
-var interval = 10 // Game time
 var lastUpdate = Date.now()
 var clock
 
@@ -45,9 +46,7 @@ birdImage.onload = () => birdReady = true
 birdImage.src = "images/bird.png"
 
 // Elements
-var clockElem
-var scoreElem
-var bestScoreElem
+var timerElem, scoreElem, bestScoreElem
 
 
 /**
@@ -74,7 +73,7 @@ function addEventListeners() {
  * @param {*} bestScore best score
  */
 function updateScoreAndTime(interval, score, bestScore) {
-	clockElem.setAttribute("value", '00 : ' + interval)
+	timerElem.setAttribute("value", '00 : ' + interval)
 	bestScoreElem.setAttribute("value", 'Best score: ' + bestScore)
 	scoreElem.setAttribute("value", score)
 }
@@ -225,7 +224,7 @@ function setTimer() {
 window.onload = function () {
 	document.getElementById("board").appendChild(canvas)
 
-	clockElem = document.getElementById("clock")
+	timerElem = document.getElementById("clock")
 	bestScoreElem = document.getElementById("bestscore")
 	scoreElem = document.getElementById("score")
 
