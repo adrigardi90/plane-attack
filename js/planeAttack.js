@@ -1,23 +1,15 @@
 // Keycodes
-// const LEFT = 37
-// const UP = 38
-// const RIGHT = 39
-// const DOWN = 40
-const [LEFT, UP, RIGHT, DOWN] = [37, 38, 39, 40]
-
+const keyCodes = [LEFT, UP, RIGHT, DOWN] = [37, 38, 39, 40]
 // KEY LISTENERS
-var keyActions = {}
+let keyActions = {}
 
 // Global var
-var totalSeconds = 0
+const GAME_DURATION = 10
+let [score, bestScore, interval] = [0, 0, GAME_DURATION]
+let firstMove = true
+let clock
 
-var [score, bestScore, interval] = [0, 0, 10]
-
-var firstMove = true
-var start = true
-var resetClock = false
-var lastUpdate = Date.now()
-var clock
+let lastUpdate = Date.now()
 
 // Canvas
 const canvas = document.createElement("canvas")
@@ -26,27 +18,25 @@ canvas.width = 850
 canvas.height = 510
 
 // Background image
-var backgroundReady = false
+let backgroundReady = false
 const backgroundImage = new Image()
 backgroundImage.onload = () => backgroundReady = true
 backgroundImage.src = "images/sky.png"
 
 // Plane
-var planeObj = { speed: 400 }
-var planeReady = false
-const planeImage = new Image()
-planeImage.onload = () => planeReady = true
-planeImage.src = "images/plane.png"
+let planeObj = { speed: 400, width: 80, height: 80, image: new Image() }
+let planeReady = false
+planeObj.image.onload = () => planeReady = true
+planeObj.image.src = "images/plane.png"
 
 // Bird 
-var birdObj = { speed: 100 }
-var birdReady = false
-const birdImage = new Image()
-birdImage.onload = () => birdReady = true
-birdImage.src = "images/bird.png"
+let birdObj = { width: 60, height: 32, image: new Image() }
+let birdReady = false
+birdObj.image.onload = () => birdReady = true
+birdObj.image.src = "images/bird.png"
 
 // Elements
-var timerElem, scoreElem, bestScoreElem
+let timerElem, scoreElem, bestScoreElem
 
 
 /**
@@ -56,7 +46,11 @@ function addEventListeners() {
 
 	//Listening event to the pressed key
 	addEventListener("keydown", (e) => {
-		if (firstMove) firstMove = false
+		if (!keyCodes.find(key => e.keyCode === key)) return
+		if (firstMove) {
+			firstMove = false
+			setTimer()
+		}
 		keyActions[e.keyCode] = true
 	}, true)
 
@@ -81,23 +75,17 @@ function updateScoreAndTime(interval, score, bestScore) {
 /**
  * Calculate the elements position in canvas
  */
-function calculatePositions() {
+function calculateFirstPositions() {
 
-	if (start) {
+	if (firstMove) {
 		// First plane position in the middle
-		planeObj.x = canvas.width / 2
-		planeObj.y = canvas.height / 2
-		start = false
-
-		// New game
-		if (resetClock) {
-			setTimer()
-		}
+		planeObj.x = (canvas.width / 2) - (planeObj.width / 2)
+		planeObj.y = (canvas.height / 2) - (planeObj.height / 2)
 	}
 
 	// Random first bird position
-	birdObj.x = Math.round(Math.random() * (canvas.width - 35))
-	birdObj.y = Math.round(Math.random() * (canvas.height - 60))
+	birdObj.x = Math.round(Math.random() * (canvas.width - birdObj.width))
+	birdObj.y = Math.round(Math.random() * (canvas.height - birdObj.height))
 }
 
 
@@ -134,7 +122,7 @@ function updateElements(elapsed) {
 	if (planeObj.x <= (birdObj.x + 30) && planeObj.y <= (birdObj.y + 16)
 		&& birdObj.x <= (planeObj.x + 40) && birdObj.y <= (planeObj.y + 40)) {
 		score++
-		calculatePositions()
+		calculateFirstPositions()
 	}
 }
 
@@ -143,6 +131,8 @@ function updateElements(elapsed) {
  * @param {*} delta time (ms)
  */
 function paintElements(delta) {
+
+	let totalSeconds
 
 	// We draw the backgroundImage all the time  to refresh and delete the last plane position
 	// We start moving the background when the first key has been pressed
@@ -168,9 +158,9 @@ function paintElements(delta) {
 	}
 
 	// Paint the plane. Size 80x80
-	ctx.drawImage(planeImage, planeObj.x, planeObj.y, 80, 80)
+	ctx.drawImage(planeObj.image, planeObj.x, planeObj.y, planeObj.width, planeObj.height)
 	// Paint the bird. Size 60x32
-	ctx.drawImage(birdImage, birdObj.x, birdObj.y, 60, 32)
+	ctx.drawImage(birdObj.image, birdObj.x, birdObj.y, birdObj.width, birdObj.height)
 
 }
 
@@ -201,22 +191,18 @@ function main() {
  */
 function setTimer() {
 	clock = setInterval(() => {
-		if (firstMove) return
-
 		// Game over 
 		if (interval === 0) {
 			clearInterval(clock)
-			start = true
-			interval = 10
-			resetClock = true
 			firstMove = true
+			interval = GAME_DURATION
 			score > bestScore ? bestScore = score : bestScore // Update best score
 			score = 0
-			calculatePositions()
-		} else {
-			// 1 less second
-			interval--
+			return calculateFirstPositions()
 		}
+
+		// 1 less second
+		interval--
 	}, 1000)
 }
 
@@ -234,14 +220,11 @@ window.onload = function () {
 
 //********************* MAIN PROGRAM *****************************/
 
+// Calculate positions
+calculateFirstPositions()
+
 // Add key event listeners
 addEventListeners()
-
-// Calculate positions
-calculatePositions()
-
-// Set clock with 1 second interval
-setTimer()
 
 // Execute main program every 1 ms
 setInterval(main, 1)
