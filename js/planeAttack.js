@@ -8,7 +8,6 @@ const GAME_DURATION = 10
 let [score, bestScore, interval] = [0, 0, GAME_DURATION]
 let firstMove = true
 let clock
-
 let lastUpdate = Date.now()
 
 // Canvas
@@ -51,6 +50,7 @@ function addEventListeners() {
 			firstMove = false
 			setTimer()
 		}
+
 		keyActions[e.keyCode] = true
 	}, true)
 
