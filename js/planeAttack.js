@@ -9,6 +9,7 @@ let [score, bestScore, interval] = [0, 0, GAME_DURATION]
 let firstMove = true
 let clock
 let lastUpdate = Date.now()
+let totalSeconds = 0
 
 // Canvas
 const canvas = document.createElement("canvas")
@@ -17,21 +18,18 @@ canvas.width = 850
 canvas.height = 510
 
 // Background image
-let backgroundReady = false
-const backgroundImage = new Image()
-backgroundImage.onload = () => backgroundReady = true
-backgroundImage.src = "images/sky.png"
+const backgroundObj = { image: new Image(), ready: false }
+backgroundObj.image.onload = () => backgroundObj.ready = true
+backgroundObj.image.src = "images/sky.png"
 
 // Plane
-let planeObj = { speed: 400, width: 80, height: 80, image: new Image() }
-let planeReady = false
-planeObj.image.onload = () => planeReady = true
+const planeObj = { speed: 400, width: 80, height: 80, image: new Image(), ready: false }
+planeObj.image.onload = () => planeObj.ready = true
 planeObj.image.src = "images/plane.png"
 
 // Bird 
-let birdObj = { width: 60, height: 32, image: new Image() }
-let birdReady = false
-birdObj.image.onload = () => birdReady = true
+const birdObj = { width: 60, height: 32, image: new Image(), ready: false }
+birdObj.image.onload = () => birdObj.ready = true
 birdObj.image.src = "images/bird.png"
 
 // Elements
@@ -92,10 +90,11 @@ function calculateFirstPositions() {
 /**
  * Update the plane position and calculate if the bird
  * has been hit
- * @param {*} elapsed time (ms)
+ * @param {*} elapsed time (s)
  */
 function updateElements(elapsed) {
 
+	// distance (pixels) = (pixels/second) * seconds
 	const distance = planeObj.speed * elapsed
 
 	// UP key
@@ -128,11 +127,9 @@ function updateElements(elapsed) {
 
 /**
  * Paint all the elements in the canvas
- * @param {*} delta time (ms)
+ * @param {*} delta time (s)
  */
 function paintElements(delta) {
-
-	let totalSeconds
 
 	// We draw the backgroundImage all the time  to refresh and delete the last plane position
 	// We start moving the background when the first key has been pressed
@@ -140,20 +137,20 @@ function paintElements(delta) {
 		totalSeconds += delta
 
 		const vx = 100 // the background scrolls with a speed of 100 pixels/sec
-		const numImages = Math.ceil(canvas.width / backgroundImage.width) + 1
-		const xpos = (totalSeconds * vx) % backgroundImage.width
+		const numImages = Math.ceil(canvas.width / backgroundObj.image.width) + 1
+		const xpos = (totalSeconds * vx) % backgroundObj.image.width
 
 		ctx.save()
 		ctx.translate(-xpos, 0)
 
 		for (let i = 0; i < numImages; i++) {
-			ctx.drawImage(backgroundImage, i * backgroundImage.width, 0)
+			ctx.drawImage(backgroundObj.image, i * backgroundObj.image.width, 0)
 		}
 
 		ctx.restore()
 	} else {
 		// Reset background image in canvas to position 0 0 (dx dy)
-		ctx.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
+		ctx.drawImage(backgroundObj.image, 0, 0, backgroundObj.image.width, backgroundObj.image.height)
 		totalSeconds = 0
 	}
 
@@ -161,7 +158,6 @@ function paintElements(delta) {
 	ctx.drawImage(planeObj.image, planeObj.x, planeObj.y, planeObj.width, planeObj.height)
 	// Paint the bird. Size 60x32
 	ctx.drawImage(birdObj.image, birdObj.x, birdObj.y, birdObj.width, birdObj.height)
-
 }
 
 /**
@@ -170,20 +166,21 @@ function paintElements(delta) {
 function main() {
 
 	// No logic untill the elements are ready
-	if (!backgroundReady || !birdReady || !planeReady) return
+	if (!backgroundObj.ready || !birdObj.ready || !planeObj.ready) return
 
+	// Elapsed time in seconds
 	const now = Date.now()
-	const elapsed = now - this.lastUpdate
-	const elapsed_ms = elapsed / 1000
+	const elapsed = (now - lastUpdate) / 1000
 
-	// Udpate and paint elements
-	updateElements(elapsed_ms)
-	paintElements(elapsed_ms)
+	// Udpate elements
+	updateElements(elapsed)
+	// Paint elements
+	paintElements(elapsed)
 	// Update values
 	updateScoreAndTime(String("0" + interval).slice(-2), score, bestScore)
 
 	// Update time
-	this.lastUpdate = now
+	lastUpdate = now
 }
 
 /**
