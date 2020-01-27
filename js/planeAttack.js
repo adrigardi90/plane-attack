@@ -96,30 +96,38 @@ function updateElements(elapsed) {
 
 	// distance (pixels) = (pixels/second) * seconds
 	const distance = planeObj.speed * elapsed
+	// Max pixels before the plan cross the limits
+	const sizeBeforeCrossing = planeObj.width - 10
 
 	// UP key
 	if (keyActions.hasOwnProperty(UP)) {
-		(planeObj.y > -70) ? planeObj.y -= distance : planeObj.y = canvas.height
+		// Crossing top canvas side?
+		(planeObj.y > -sizeBeforeCrossing) ? planeObj.y -= distance : planeObj.y = canvas.height
 	}
 
 	// DOWN key
 	if (keyActions.hasOwnProperty(DOWN)) {
-		(planeObj.y < canvas.height) ? planeObj.y += distance : planeObj.y = -70
+		// Crossing bottom
+		(planeObj.y < canvas.height) ? planeObj.y += distance : planeObj.y = -sizeBeforeCrossing
 	}
 
 	// RIGHT key
 	if (keyActions.hasOwnProperty(RIGHT)) {
-		(planeObj.x < canvas.width) ? planeObj.x += distance : planeObj.x = -70
+		// Crossing right
+		(planeObj.x < canvas.width) ? planeObj.x += distance : planeObj.x = -sizeBeforeCrossing
 	}
 
 	// LEFT key
 	if (keyActions.hasOwnProperty(LEFT)) {
-		(planeObj.x > -70) ? planeObj.x -= distance : planeObj.x = canvas.width
+		// Crossing left
+		(planeObj.x > -sizeBeforeCrossing) ? planeObj.x -= distance : planeObj.x = canvas.width
 	}
 
 	// Did we hit the bird?
-	if (planeObj.x <= (birdObj.x + 30) && planeObj.y <= (birdObj.y + 16)
-		&& birdObj.x <= (planeObj.x + 40) && birdObj.y <= (planeObj.y + 40)) {
+	if (planeObj.x <= (birdObj.x + (birdObj.width/2)) && 
+		planeObj.y <= (birdObj.y + (birdObj.height/2)) && 
+		birdObj.x <= (planeObj.x + (planeObj.width/2)) && 
+		birdObj.y <= (planeObj.y + (planeObj.height/2))) {
 		score++
 		calculateFirstPositions()
 	}
@@ -168,7 +176,7 @@ function main() {
 	// No logic untill the elements are ready
 	if (!backgroundObj.ready || !birdObj.ready || !planeObj.ready) return
 
-	// Elapsed time in seconds
+	// Calculate elapsed time (seconds)
 	const now = Date.now()
 	const elapsed = (now - lastUpdate) / 1000
 
@@ -215,7 +223,7 @@ window.onload = function () {
 }
 
 
-//********************* MAIN PROGRAM *****************************/
+//********************* PROGRAM *****************************/
 
 // Calculate positions
 calculateFirstPositions()
