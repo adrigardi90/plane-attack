@@ -232,4 +232,4 @@ calculateFirstPositions()
 addEventListeners()
 
 // Execute main program every 1 ms
-setInterval(main, 1)
+setInterval(main, 16)
