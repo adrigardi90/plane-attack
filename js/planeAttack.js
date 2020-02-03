@@ -135,14 +135,14 @@ function updateElements(elapsed) {
 
 /**
  * Paint all the elements in the canvas
- * @param {*} delta time (s)
+ * @param {*} elapsed time (s)
  */
-function paintElements(delta) {
+function paintElements(elapsed) {
 
-	// We draw the backgroundImage all the time  to refresh and delete the last plane position
+	// We draw the backgroundImage all the time to refresh and delete the last plane position
 	// We start moving the background when the first key has been pressed
 	if (!firstMove) {
-		totalSeconds += delta
+		totalSeconds += elapsed
 
 		const vx = 100 // the background scrolls with a speed of 100 pixels/sec
 		const numImages = Math.ceil(canvas.width / backgroundObj.image.width) + 1
