@@ -18,7 +18,7 @@ canvas.width = 850
 canvas.height = 510
 
 // Background image
-const backgroundObj = { image: new Image(), ready: false }
+const backgroundObj = { image: new Image(), ready: false, speed: 100 }
 backgroundObj.image.onload = () => backgroundObj.ready = true
 backgroundObj.image.src = "images/sky.png"
 
@@ -97,37 +97,39 @@ function updateElements(elapsed) {
 	// distance (pixels) = (pixels/second) * seconds
 	const distance = planeObj.speed * elapsed
 	// Max pixels before the plan cross the limits
-	const sizeBeforeCrossing = planeObj.width - 10
+	const planeLimit = planeObj.width - 10
+	const heightLimit = canvas.height - 10
+	const widthLimit = canvas.width - 10
 
 	// UP key
 	if (keyActions.hasOwnProperty(UP)) {
 		// Crossing top canvas side?
-		(planeObj.y > -sizeBeforeCrossing) ? planeObj.y -= distance : planeObj.y = canvas.height
+		(planeObj.y > -planeLimit) ? planeObj.y -= distance : planeObj.y = heightLimit
 	}
 
 	// DOWN key
 	if (keyActions.hasOwnProperty(DOWN)) {
 		// Crossing bottom
-		(planeObj.y < canvas.height) ? planeObj.y += distance : planeObj.y = -sizeBeforeCrossing
+		(planeObj.y < heightLimit) ? planeObj.y += distance : planeObj.y = -planeLimit
 	}
 
 	// RIGHT key
 	if (keyActions.hasOwnProperty(RIGHT)) {
 		// Crossing right
-		(planeObj.x < canvas.width) ? planeObj.x += distance : planeObj.x = -sizeBeforeCrossing
+		(planeObj.x < widthLimit) ? planeObj.x += distance : planeObj.x = -planeLimit
 	}
 
 	// LEFT key
 	if (keyActions.hasOwnProperty(LEFT)) {
 		// Crossing left
-		(planeObj.x > -sizeBeforeCrossing) ? planeObj.x -= distance : planeObj.x = canvas.width
+		(planeObj.x > -planeLimit) ? planeObj.x -= distance : planeObj.x = widthLimit
 	}
 
 	// Did we hit the bird?
-	if (planeObj.x <= (birdObj.x + (birdObj.width/2)) && 
-		planeObj.y <= (birdObj.y + (birdObj.height/2)) && 
-		birdObj.x <= (planeObj.x + (planeObj.width/2)) && 
-		birdObj.y <= (planeObj.y + (planeObj.height/2))) {
+	if (planeObj.x <= (birdObj.x + (birdObj.width / 2)) &&
+		planeObj.y <= (birdObj.y + (birdObj.height / 2)) &&
+		birdObj.x <= (planeObj.x + (planeObj.width / 2)) &&
+		birdObj.y <= (planeObj.y + (planeObj.height / 2))) {
 		score++
 		calculateFirstPositions()
 	}
@@ -144,14 +146,16 @@ function paintElements(elapsed) {
 	if (!firstMove) {
 		totalSeconds += elapsed
 
-		const vx = 100 // the background scrolls with a speed of 100 pixels/sec
-		const numImages = Math.ceil(canvas.width / backgroundObj.image.width) + 1
-		const xpos = (totalSeconds * vx) % backgroundObj.image.width
+		const numImages = Math.ceil(canvas.width / backgroundObj.image.width)
+		const xpos = (totalSeconds * backgroundObj.speed) % backgroundObj.image.width // xpos pixels
 
 		ctx.save()
+		// Translate canvas (not with the background image)
 		ctx.translate(-xpos, 0)
 
+		// Infinite background animation
 		for (let i = 0; i < numImages; i++) {
+			// Draw background image over the translated canvas
 			ctx.drawImage(backgroundObj.image, i * backgroundObj.image.width, 0)
 		}
 
