@@ -1,212 +1,239 @@
-//Keycodes
-const LEFT = 37;
-const UP = 38;
-const RIGHT = 39;
-const DOWN = 40;
+// Keycodes
+const keyCodes = [LEFT, UP, RIGHT, DOWN] = [37, 38, 39, 40]
+// KEY LISTENERS
+let keyActions = {}
 
-//Global var
-var totalSeconds = 0;
-var score = 0;
-var bestScore = 0;
-var firstMove = true;
-var start = true;
-var resetClock = false;
-var interval = 10;
-var lastUpdate = Date.now();
+// Global var
+const GAME_DURATION = 10
+let [score, bestScore, interval] = [0, 0, GAME_DURATION]
+let firstMove = true
+let clock
+let lastUpdate = Date.now()
+let totalSeconds = 0
 
-//Canvas
-var canvas = document.createElement("canvas");
-var ctx = canvas.getContext("2d");
-canvas.width = 850;
-canvas.height = 510;
+// Canvas
+const canvas = document.createElement("canvas")
+const ctx = canvas.getContext("2d")
+canvas.width = 850
+canvas.height = 510
 
-//Background image
-var backgroundReady = false;
-var backgroundImage = new Image();
-backgroundImage.onload =  () => backgroundReady = true;
-backgroundImage.src = "images/sky2.png";
+// Background image
+const backgroundObj = { image: new Image(), ready: false, speed: 100 }
+backgroundObj.image.onload = () => backgroundObj.ready = true
+backgroundObj.image.src = "images/sky.png"
 
-//Plane
-var planeObj = {speed: 400}
-var planeReady = false;
-var planeImage = new Image();
-planeImage.onload = () => planeReady = true;
-planeImage.src = "images/plane.png";
+// Plane
+const planeObj = { speed: 400, width: 80, height: 80, image: new Image(), ready: false }
+planeObj.image.onload = () => planeObj.ready = true
+planeObj.image.src = "images/plane.png"
 
-//Bird 
-var birdObj = {speed: 100}
-var birdReady =  false;
-var birdImage = new Image();
-birdImage.onload = () => birdReady = true;
-birdImage.src = "images/bird.png";
+// Bird 
+const birdObj = { width: 60, height: 32, image: new Image(), ready: false }
+birdObj.image.onload = () => birdObj.ready = true
+birdObj.image.src = "images/bird.png"
+
+// Elements
+let timerElem, scoreElem, bestScoreElem
 
 
-//KEY LISTENERS
-var keyActions = {};
+/**
+ * Add the key listeners
+ */
+function addEventListeners() {
 
-//Listening event to the pressed key
-addEventListener("keydown", (e) => {
-	firstMove == true ? firstMove = false : firstMove =  firstMove;
-	keyActions[e.keyCode] = true;
-}, true);
-
-//Listening event when the key is released
-addEventListener("keyup", (e) => {
-	delete keyActions[e.keyCode];
-}, true);
-
-
-//Init positions	
-function init(){
-
-	if(start){
-
-		//First plane position
-		planeObj.x = canvas.width / 2;
-		planeObj.y = canvas.height /2;	
-		start = false;	
-
-		//New game
-		if(resetClock){
-			clock = setInterval(() => 
-				{
-					if(!firstMove){
-						checkClock();
-						/*document.getElementById("dial1").setAttribute("class", "startSecond1");
-						document.getElementById("dial2").setAttribute("class", "startSecond2");*/
-						document.getElementById("clock").setAttribute("value", '00 : ' + String("0" + interval).slice(-2));
-						document.getElementById("score").setAttribute("value", score );
-						document.getElementById("bestscore").setAttribute("value", 'Mejor puntuacion : ' + bestScore);
-					}
-				},1000) 
+	//Listening event to the pressed key
+	addEventListener("keydown", (e) => {
+		if (!keyCodes.find(key => e.keyCode === key)) return
+		if (firstMove) {
+			firstMove = false
+			setTimer()
 		}
-		
-	}
-	
-	//Random first bird position
-	birdObj.x = Math.round(Math.random()*(canvas.width - 35));
-	birdObj.y = Math.round(Math.random()*(canvas.height - 60));
+
+		keyActions[e.keyCode] = true
+	}, true)
+
+	//Listening event when the key is released
+	addEventListener("keyup", (e) => {
+		delete keyActions[e.keyCode]
+	}, true)
 }
 
-//Update the plane position
-function updatePosition(elapsed){
+/**
+ * Update rating values
+ * @param {*} interval game time left
+ * @param {*} score current score
+ * @param {*} bestScore best score
+ */
+function updateScoreAndTime(interval, score, bestScore) {
+	timerElem.setAttribute("value", '00 : ' + interval)
+	bestScoreElem.setAttribute("value", 'Best score: ' + bestScore)
+	scoreElem.setAttribute("value", score)
+}
 
-	var distance = planeObj.speed * elapsed;
+/**
+ * Calculate the elements position in canvas
+ */
+function calculateFirstPositions() {
 
-	//UP key
-	if(keyActions.hasOwnProperty(UP)){
-		(planeObj.y > -70) ? planeObj.y -= distance : planeObj.y = canvas.height;
+	if (firstMove) {
+		// First plane position in the middle
+		planeObj.x = (canvas.width / 2) - (planeObj.width / 2)
+		planeObj.y = (canvas.height / 2) - (planeObj.height / 2)
 	}
 
-	//DOWN key
-	if(keyActions.hasOwnProperty(DOWN)){
-		(planeObj.y < canvas.height) ? planeObj.y += distance : planeObj.y = -70;
+	// Random first bird position
+	birdObj.x = Math.round(Math.random() * (canvas.width - birdObj.width))
+	birdObj.y = Math.round(Math.random() * (canvas.height - birdObj.height))
+}
+
+
+/**
+ * Update the plane position and calculate if the bird
+ * has been hit
+ * @param {*} elapsed time (s)
+ */
+function updateElements(elapsed) {
+
+	// distance (pixels) = (pixels/second) * seconds
+	const distance = planeObj.speed * elapsed
+	// Max pixels before the plan cross the limits
+	const planeLimit = planeObj.width - 10
+	const heightLimit = canvas.height - 10
+	const widthLimit = canvas.width - 10
+
+	// UP key
+	if (keyActions.hasOwnProperty(UP)) {
+		// Crossing top canvas side?
+		(planeObj.y > -planeLimit) ? planeObj.y -= distance : planeObj.y = heightLimit
 	}
 
-	//RIGHT key
-	if(keyActions.hasOwnProperty(RIGHT)){
-		(planeObj.x < canvas.width) ? planeObj.x += distance : planeObj.x = -70;
+	// DOWN key
+	if (keyActions.hasOwnProperty(DOWN)) {
+		// Crossing bottom
+		(planeObj.y < heightLimit) ? planeObj.y += distance : planeObj.y = -planeLimit
 	}
 
-	//LEFT key
-	if(keyActions.hasOwnProperty(LEFT)){
-		(planeObj.x > -70) ? planeObj.x -= distance : planeObj.x = canvas.width;
+	// RIGHT key
+	if (keyActions.hasOwnProperty(RIGHT)) {
+		// Crossing right
+		(planeObj.x < widthLimit) ? planeObj.x += distance : planeObj.x = -planeLimit
 	}
 
-	//Touch bird?
-	if( planeObj.x <= (birdObj.x + 30) && planeObj.y <= (birdObj.y + 16)
-		&& birdObj.x <=(planeObj.x + 40) &&  birdObj.y <= (planeObj.y + 40)){
-		score++;
-		init();
+	// LEFT key
+	if (keyActions.hasOwnProperty(LEFT)) {
+		// Crossing left
+		(planeObj.x > -planeLimit) ? planeObj.x -= distance : planeObj.x = widthLimit
+	}
+
+	// Did we hit the bird?
+	if (planeObj.x <= (birdObj.x + (birdObj.width / 2)) &&
+		planeObj.y <= (birdObj.y + (birdObj.height / 2)) &&
+		birdObj.x <= (planeObj.x + (planeObj.width / 2)) &&
+		birdObj.y <= (planeObj.y + (planeObj.height / 2))) {
+		score++
+		calculateFirstPositions()
 	}
 }
 
-//Draw all the objects
-function paintPosition(delta){
+/**
+ * Paint all the elements in the canvas
+ * @param {*} elapsed time (s)
+ */
+function paintElements(elapsed) {
 
-	//We need to draw the backgroundImage all the time, in order to refresh and delete the last plane position
-	if(backgroundReady){
-		
-		if(!firstMove){
-			totalSeconds += delta;
+	// We draw the backgroundImage all the time to refresh and delete the last plane position
+	// We start moving the background when the first key has been pressed
+	if (!firstMove) {
+		totalSeconds += elapsed
 
-			var vx = 100; // the background scrolls with a speed of 100 pixels/sec
-			var numImages = Math.ceil(canvas.width / backgroundImage.width) + 1;
-			var xpos = totalSeconds * vx % backgroundImage.width;
+		const numImages = Math.ceil(canvas.width / backgroundObj.image.width)
+		const xpos = (totalSeconds * backgroundObj.speed) % backgroundObj.image.width // xpos pixels
 
-			ctx.save();
-			ctx.translate(-xpos, 0);
+		ctx.save()
+		// Translate canvas (not with the background image)
+		ctx.translate(-xpos, 0)
 
-			for (var i = 0; i < numImages; i++) {
-				ctx.drawImage(backgroundImage, i * backgroundImage.width, 0);
-			}
-
-			ctx.restore();
-		}else{
-			ctx.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height);
-			totalSeconds = 0;
+		// Infinite background animation
+		for (let i = 0; i < numImages; i++) {
+			// Draw background image over the translated canvas
+			ctx.drawImage(backgroundObj.image, i * backgroundObj.image.width, 0)
 		}
+
+		ctx.restore()
+	} else {
+		// Reset background image in canvas to position 0 0 (dx dy)
+		ctx.drawImage(backgroundObj.image, 0, 0, backgroundObj.image.width, backgroundObj.image.height)
+		totalSeconds = 0
 	}
 
-	if(planeReady){
-		ctx.drawImage(planeImage, planeObj.x, planeObj.y, 80, 80);	
-	}
-
-	if(birdReady){
-		ctx.drawImage(birdImage, birdObj.x, birdObj.y, 60, 35);	
-	}
+	// Paint the plane. Size 80x80
+	ctx.drawImage(planeObj.image, planeObj.x, planeObj.y, planeObj.width, planeObj.height)
+	// Paint the bird. Size 60x32
+	ctx.drawImage(birdObj.image, birdObj.x, birdObj.y, birdObj.width, birdObj.height)
 }
 
-//Main program cicle 
-function main(){
+/**
+ * Main program
+ */
+function main() {
 
-	var now = Date.now();
-	var elapsed = (now - this.lastUpdate);
+	// No logic untill the elements are ready
+	if (!backgroundObj.ready || !birdObj.ready || !planeObj.ready) return
 
-	updatePosition(elapsed/1000);
-	paintPosition(elapsed/1000);
+	// Calculate elapsed time (seconds)
+	const now = Date.now()
+	const elapsed = (now - lastUpdate) / 1000
 
-	this.lastUpdate = now;
+	// Udpate elements
+	updateElements(elapsed)
+	// Paint elements
+	paintElements(elapsed)
+	// Update values
+	updateScoreAndTime(String("0" + interval).slice(-2), score, bestScore)
+
+	// Update time
+	lastUpdate = now
 }
 
-//Time control and reset
-function checkClock(){
-
-	if(interval === 0){
-		clearInterval(clock);	
-		start = true;
-		interval = 10;
-		resetClock = true;
-		firstMove = true;
-		score > bestScore ? bestScore = score : bestScore;
-		score = 0;	
-		init();
-	}else{
-		interval--;	
-	}
-}
-
-//Append canvas to div tag
-window.onload = function(){
-	document.getElementById("main").appendChild(canvas);
-	document.getElementById("clock").setAttribute("value", '00 : ' + interval);
-	document.getElementById("bestscore").setAttribute("value", 'Mejor puntuacion : ' + bestScore);
-	document.getElementById("score").setAttribute("value", score );
-}
-
-init();		
-
-//Control game time
-var clock = setInterval( 
-	() => {
-		if(!firstMove){
-			checkClock();
-			
-			document.getElementById("clock").setAttribute("value", '00 : ' + String("0" + interval).slice(-2));
-			document.getElementById("score").setAttribute("value",  score );
-			document.getElementById("bestscore").setAttribute("value", 'Mejor puntuacion : ' + bestScore);
+/**
+ * Control the game time
+ */
+function setTimer() {
+	clock = setInterval(() => {
+		// Game over 
+		if (interval === 0) {
+			clearInterval(clock)
+			firstMove = true
+			interval = GAME_DURATION
+			score > bestScore ? bestScore = score : bestScore // Update best score
+			score = 0
+			return calculateFirstPositions()
 		}
-	},1000) 
 
-//Exec main program
-setInterval(main, 1);
+		// 1 less second
+		interval--
+	}, 1000)
+}
+
+// Append canvas to div tag
+window.onload = function () {
+	document.getElementById("board").appendChild(canvas)
+
+	timerElem = document.getElementById("clock")
+	bestScoreElem = document.getElementById("bestscore")
+	scoreElem = document.getElementById("score")
+
+	updateScoreAndTime(interval, score, bestScore)
+}
+
+
+//********************* PROGRAM *****************************/
+
+// Calculate positions
+calculateFirstPositions()
+
+// Add key event listeners
+addEventListeners()
+
+// Execute main program every 1 ms
+setInterval(main, 16)
